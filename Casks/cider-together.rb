@@ -1,6 +1,6 @@
 cask "cider-together" do
-  version "1.0.0"
-  sha256 "e5dcd92abbe2cf518ceaaed34a4615ba2f45ce14574e2aeedaa70233d78d8001"
+  version "1.0.1"
+  sha256 "1a3dfa7fb5bd703cedb1188db6c9514769fc11cbfcf8371236c7d2267d2aa76a"
 
   url "https://github.com/giorgiobrullo/cider-listen-together/releases/download/v#{version}/CiderTogether-#{version}.dmg"
   name "CiderTogether"
