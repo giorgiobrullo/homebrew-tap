@@ -3,7 +3,7 @@
 [![Homebrew](https://img.shields.io/badge/Homebrew-FBB040?style=for-the-badge&logo=homebrew&logoColor=black)](https://brew.sh/)
 [![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white)](https://developer.apple.com/macos/)
 
-Personal Homebrew tap for macOS and Linux utilities.
+Personal Homebrew tap for my macOS applications.
 
 ## Usage
 
@@ -13,36 +13,17 @@ Personal Homebrew tap for macOS and Linux utilities.
 brew tap giorgiobrullo/tap
 ```
 
-### Install apps and formulae
+### Install apps
 
 ```bash
 brew install --cask <app-name>
-brew install <formula-name>
 ```
 
 ## Available Apps
 
-| Name | Description | Install |
-|------|-------------|---------|
+| App | Description | Install |
+|-----|-------------|---------|
 | [CiderTogether](https://github.com/giorgiobrullo/cider-listen-together) | Listen to music together with friends using Cider | `brew install --cask cider-together` |
-| tailscale-patched | Tailscale CLI daemon with a per-profile `--allow-public-inbound` toggle for personal routed-prefix/BGP setups | `brew install tailscale-patched` |
-
-## tailscale-patched
-
-This formula builds Tailscale from the upstream stable tag with a patch that adds:
-
-```bash
-tailscale set --allow-public-inbound=true
-tailscale set --allow-public-inbound=false
-```
-
-The setting is stored in Tailscale prefs for the active profile/network and is off by default. When enabled, inbound packets received from tailnet peers are allowed through even when their original source IP is not a tailnet IP.
-
-Start the daemon as root for real TUN/utun mode:
-
-```bash
-sudo brew services start tailscale-patched
-```
 
 ## One-liner
 
@@ -50,7 +31,6 @@ Install any app directly without adding the tap first:
 
 ```bash
 brew install --cask giorgiobrullo/tap/cider-together
-brew install giorgiobrullo/tap/tailscale-patched
 ```
 
 ## Updates
