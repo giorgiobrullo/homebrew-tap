@@ -16,26 +16,10 @@ class TailscalePatched < Formula
 
   conflicts_with "tailscale", because: "both install tailscale and tailscaled binaries"
   conflicts_with cask: "tailscale-app"
-  conflicts_with cask: "tailscale"
 
   patch :DATA
 
   def install
-    official_casks = %w[tailscale-app tailscale].filter_map do |token|
-      caskroom = HOMEBREW_PREFIX/"Caskroom/#{token}"
-      token if caskroom.directory? && !caskroom.children.empty?
-    end
-    if official_casks.any?
-      odie <<~EOS
-        tailscale-patched must not be installed alongside the official Tailscale cask.
-
-        Remove the official cask first:
-          brew uninstall --cask #{official_casks.join(" ")}
-
-        Then reinstall tailscale-patched.
-      EOS
-    end
-
     vars = Utils.safe_popen_read("./build_dist.sh", "shellvars")
     ldflags = %W[
       -s -w
@@ -80,10 +64,9 @@ class TailscalePatched < Formula
 
         sudo brew services start tailscale-patched
 
-      Do not install or run this alongside the official Tailscale cask/app.
-      If it is present, remove it first:
-
-        brew uninstall --cask tailscale-app
+      The CLI is installed as tailscale-patched so it can coexist with the
+      official Tailscale app's tailscale wrapper. Do not run both daemons at
+      the same time; quit/disable the official app before starting this service.
     EOS
   end
 
