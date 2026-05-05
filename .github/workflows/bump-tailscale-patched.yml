@@ -1,0 +1,85 @@
+name: Bump tailscale-patched
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 8 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+
+      - name: Update formula to latest stable Tailscale release
+        id: update
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          latest="$(gh release view --repo tailscale/tailscale --json tagName,isPrerelease --jq 'select(.isPrerelease == false) | .tagName')"
+          rev="$(git ls-remote https://github.com/tailscale/tailscale.git "refs/tags/${latest}^{}" | awk '{print $1}')"
+          if [[ -z "${rev}" ]]; then
+            rev="$(git ls-remote https://github.com/tailscale/tailscale.git "refs/tags/${latest}" | awk '{print $1}')"
+          fi
+
+          export LATEST="${latest}" REV="${rev}"
+          ruby -pi -e 'gsub(/tag:\s+"v[^"]+"/, "tag:      \"#{ENV.fetch("LATEST")}\""); gsub(/revision:\s+"[a-f0-9]{40}"/, "revision: \"#{ENV.fetch("REV")}\"")' \
+            Formula/tailscale-patched.rb
+
+          changed=false
+          if ! git diff --quiet -- Formula/tailscale-patched.rb; then
+            changed=true
+          fi
+          {
+            echo "latest=${latest}"
+            echo "rev=${rev}"
+            echo "changed=${changed}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Verify patch on updated source
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+
+          patch_file="$(mktemp)"
+          awk 'seen {print} /^__END__$/ {seen=1}' Formula/tailscale-patched.rb > "${patch_file}"
+
+          src="$(mktemp -d)"
+          git clone --depth 1 --branch "${{ steps.update.outputs.latest }}" https://github.com/tailscale/tailscale.git "${src}"
+          git -C "${src}" apply --check "${patch_file}"
+          git -C "${src}" apply "${patch_file}"
+
+          cd "${src}"
+          go test ./ipn ./cmd/tailscale/cli ./wgengine/filter ./net/tstun ./ipn/ipnlocal
+
+      - name: Open pull request
+        if: steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          branch="autobump/tailscale-patched-${{ steps.update.outputs.latest }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${branch}"
+          git add Formula/tailscale-patched.rb
+          git commit -m "chore: bump tailscale-patched to ${{ steps.update.outputs.latest }}"
+          git push --force-with-lease --set-upstream origin "${branch}"
+
+          gh pr create \
+            --title "chore: bump tailscale-patched to ${{ steps.update.outputs.latest }}" \
+            --body "Updates tailscale-patched to upstream ${{ steps.update.outputs.latest }} after verifying the inline patch and targeted tests." \
+            --base main \
+            --head "${branch}"
