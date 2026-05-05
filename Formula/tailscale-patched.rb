@@ -28,10 +28,8 @@ class TailscalePatched < Formula
       -X tailscale.com/version.gitCommitStamp=#{vars.match(/VERSION_GIT_HASH="(.*)"/)[1]}
     ]
 
-    system "go", "build", *std_go_args(ldflags:), "./cmd/tailscale"
+    system "go", "build", *std_go_args(ldflags:, output: bin/"tailscale-patched"), "./cmd/tailscale"
     system "go", "build", *std_go_args(ldflags:, output: bin/"tailscaled"), "./cmd/tailscaled"
-
-    generate_completions_from_executable(bin/"tailscale", shell_parameter_format: :cobra)
   end
 
   def post_install
@@ -53,8 +51,8 @@ class TailscalePatched < Formula
       It adds a per-profile preference that can bypass the inbound ACL packet
       filter while leaving the default upstream behavior unchanged:
 
-        tailscale set --allow-public-inbound=true
-        tailscale set --allow-public-inbound=false
+        tailscale-patched set --allow-public-inbound=true
+        tailscale-patched set --allow-public-inbound=false
 
       The setting is stored in Tailscale prefs for the active profile/network.
       It is intentionally off by default. Enabling it allows packets received
@@ -66,20 +64,23 @@ class TailscalePatched < Formula
 
         sudo brew services start tailscale-patched
 
-      This formula conflicts with the official Tailscale app and formula.
+      The CLI is installed as tailscale-patched so it can coexist with the
+      official Tailscale app's tailscale wrapper. Do not run both daemons at
+      the same time; quit/disable the official app before starting this service.
     EOS
   end
 
   test do
-    version_text = shell_output("#{bin}/tailscale version")
+    version_text = shell_output("#{bin}/tailscale-patched version")
     assert_match version.to_s, version_text
     assert_match(/commit: [a-f0-9]{40}/, version_text)
-    assert_match "--allow-public-inbound", shell_output("#{bin}/tailscale set --help")
+    assert_match "--allow-public-inbound", shell_output("#{bin}/tailscale-patched set --help")
 
     spawn bin/"tailscaled", "-tun=userspace-networking", "-socket=#{testpath}/tailscaled.socket",
                             "-statedir=#{testpath}/state"
     sleep 2
-    assert_match "Logged out.", shell_output("#{bin}/tailscale --socket=#{testpath}/tailscaled.socket status", 1)
+    status = shell_output("#{bin}/tailscale-patched --socket=#{testpath}/tailscaled.socket status", 1)
+    assert_match "Logged out.", status
   end
 end
 
