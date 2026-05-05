@@ -38,7 +38,11 @@ tailscale-patched set --allow-public-inbound=false
 
 The setting is stored in Tailscale prefs for the active profile/network and is off by default. When enabled, inbound packets received from tailnet peers are allowed through even when their original source IP is not a tailnet IP.
 
-The CLI is installed as `tailscale-patched` so it can coexist with the official Tailscale app's `tailscale` wrapper. Do not run both daemons at the same time; quit/disable the official app before starting this service.
+Do not install or run this alongside the official Tailscale cask/app. Remove it first:
+
+```bash
+brew uninstall --cask tailscale-app
+```
 
 Start the daemon as root for real TUN/utun mode:
 
