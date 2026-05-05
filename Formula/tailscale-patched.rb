@@ -74,7 +74,7 @@ class TailscalePatched < Formula
     version_text = shell_output("#{bin}/tailscale-patched version")
     assert_match version.to_s, version_text
     assert_match(/commit: [a-f0-9]{40}/, version_text)
-    assert_match "--allow-public-inbound", shell_output("#{bin}/tailscale-patched set --help")
+    assert_match "--allow-public-inbound", shell_output("#{bin}/tailscale-patched set --help 2>&1")
 
     spawn bin/"tailscaled", "-tun=userspace-networking", "-socket=#{testpath}/tailscaled.socket",
                             "-statedir=#{testpath}/state"
