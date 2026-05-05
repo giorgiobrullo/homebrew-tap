@@ -32,8 +32,8 @@ brew install <formula-name>
 This formula builds Tailscale from the upstream stable tag with a patch that adds:
 
 ```bash
-tailscale-patched set --allow-public-inbound=true
-tailscale-patched set --allow-public-inbound=false
+tailscale set --allow-public-inbound=true
+tailscale set --allow-public-inbound=false
 ```
 
 The setting is stored in Tailscale prefs for the active profile/network and is off by default. When enabled, inbound packets received from tailnet peers are allowed through even when their original source IP is not a tailnet IP.
