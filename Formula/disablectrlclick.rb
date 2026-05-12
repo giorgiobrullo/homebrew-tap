@@ -28,7 +28,7 @@ class Disablectrlclick < Formula
         tccutil reset Accessibility com.usr.DisableCtrlClick
         tccutil reset ListenEvent  com.usr.DisableCtrlClick
 
-      To upgrade to the latest commit on main:
+      To upgrade to the latest commit on master:
         brew upgrade --fetch-HEAD giorgiobrullo/tap/disablectrlclick
     EOS
   end
