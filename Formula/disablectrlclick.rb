@@ -34,6 +34,6 @@ class Disablectrlclick < Formula
   end
 
   test do
-    assert_predicate prefix/"DisableCtrlClick.app/Contents/MacOS/DisableCtrlClick", :exist?
+    assert_path_exists prefix/"DisableCtrlClick.app/Contents/MacOS/DisableCtrlClick"
   end
 end
