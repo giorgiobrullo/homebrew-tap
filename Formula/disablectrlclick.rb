@@ -2,7 +2,7 @@ class Disablectrlclick < Formula
   desc "Menubar utility that disables Ctrl+Click as right-click on macOS"
   homepage "https://github.com/achendev/DisableCtrlClick"
   license "MIT"
-  head "https://github.com/achendev/DisableCtrlClick.git", branch: "main"
+  head "https://github.com/achendev/DisableCtrlClick.git", branch: "master"
 
   depends_on :macos
 
